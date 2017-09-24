@@ -1,0 +1,10 @@
+[Unit]
+Description=Change ambience color periodically
+
+[Timer]
+OnBoot=0min
+OnCalendar=*:0/15
+Persistent=true
+
+[Install]
+WantedBy=timers.target

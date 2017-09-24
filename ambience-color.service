@@ -1,0 +1,6 @@
+[Unit]
+Description=Change ambience color periodically
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python /home/nemo/dev/ambience-script/ambience-color.py
