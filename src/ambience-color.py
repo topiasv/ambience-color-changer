@@ -14,6 +14,7 @@ group.add_argument('-m', '--manual', type=float, help='Set the ambience color ma
 parser.add_argument('-n', '--nighttime', nargs=2, default=[22,8], metavar=('start, duration'), type=int, help='Color stays at red during night time')
 parser.add_argument('-e', '--interval', default=15, type=int, help='Set the color updating interval in minutes')
 parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
+parser.add_argument('-l', '--loop', action='store_true', help='Enable loop mode')
 args = parser.parse_args()
 hue = 0.0
 
@@ -44,20 +45,32 @@ def timeColor():
     changeColor(hue)
 
 def incrementalColor(step):
+    global hue
     hue = (hue + step) % 1.0
 
 def timeSync(interval):
     timeNow = time.localtime()
     timeSeconds = ((timeNow.tm_hour * 60) + timeNow.tm_min * 60) + timeNow.tm_sec
-    update = 60 - (timeSeconds % (60*interval))
+    update = 60 * interval - (timeSeconds % (60 * interval))
     if args.verbose:
         print('Update in {0} seconds'.format(update), end="")
     return update
 
+def run():
+    if args.random:
+        randomColor()
+    elif args.time:
+        timeColor()
+    elif args.incremental:
+        incrementalColor(args.incremental)
+    else:
+        randomColor()
+
 def main():
     if args.manual:
         changeColor(args.manual)
-    else:
+
+    elif args.loop:
         print('Loop mode started, interval: {0}'.format(args.interval))
         if args.verbose and args.nighttime and args.time:
             print("Night time start: {0}, duration: {1}".format(args.nighttime[0], args.nighttime[1]))
@@ -72,16 +85,12 @@ def main():
                     minutes = "0" + str(minutes)
                 print('[{0}:{1}] '.format(hours, minutes), end="")
 
-            if args.random:
-                randomColor()
-            elif args.time:
-                timeColor()
-            elif args.incremental:
-                incrementalColor(args.incremental)
-            else:
-                randomColor()
+            run()
+
             sleepTimer = timeSync(args.interval)
             print()
             time.sleep(sleepTimer)
+    else:
+        run()
 
 main()
